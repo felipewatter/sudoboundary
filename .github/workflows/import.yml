@@ -1,0 +1,51 @@
+name: Bootstrap vetted SudoBoundary source
+on:
+  push:
+    branches: [main]
+    paths:
+      - source.bundle.b64
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Validate and unpack SHA-256-pinned archive
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64, hashlib, io, tarfile
+          from pathlib import Path
+          expected = "2d6c2870423b778f13ba5899b561d84972de45a364d2165cb98485f5cf2944d5"
+          raw = base64.b64decode(Path("source.bundle.b64").read_text(encoding="ascii").strip(), validate=True)
+          assert hashlib.sha256(raw).hexdigest() == expected, "Source archive digest does not match"
+          root = Path.cwd().resolve()
+          count = 0
+          with tarfile.open(fileobj=io.BytesIO(raw), mode="r:xz") as archive:
+              for member in archive:
+                  assert member.isfile(), "Archive contains a non-regular file"
+                  assert member.name != ".github/workflows/import.yml", "Workflow modification is not allowed"
+                  path = (root / member.name).resolve()
+                  assert path != root and root in path.parents, "Path traversal detected"
+                  data = archive.extractfile(member).read()
+                  if member.name != ".github/workflows/ci.yml":
+                      path.parent.mkdir(parents=True, exist_ok=True)
+                      path.write_bytes(data)
+                  count += 1
+          assert count == 29, f"Unexpected source count: {count}"
+          Path("source.bundle.b64").unlink()
+          print("Verified and extracted", count, "files (CI workflow to be added separately).")
+          PY
+      - name: Commit imported source
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "feat: import verified SudoBoundary v1.0.0 source"
+          git push
