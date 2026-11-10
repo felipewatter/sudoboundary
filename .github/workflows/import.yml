@@ -22,7 +22,7 @@ jobs:
           import base64, hashlib, io, tarfile
           from pathlib import Path
           expected = "2d6c2870423b778f13ba5899b561d84972de45a364d2165cb98485f5cf2944d5"
-          raw = base64.b64decode(Path("source.bundle.b64").read_text(encoding="ascii").strip(), validate=True)
+          raw = base64.b64decode("".join(Path(f"source.part.{i:02d}").read_text(encoding="ascii").strip() for i in range(1, 8)), validate=True)
           assert hashlib.sha256(raw).hexdigest() == expected, "Source archive digest does not match"
           root = Path.cwd().resolve()
           count = 0
@@ -39,6 +39,8 @@ jobs:
                   count += 1
           assert count == 29, f"Unexpected source count: {count}"
           Path("source.bundle.b64").unlink()
+          for i in range(1, 8):
+              Path(f"source.part.{i:02d}").unlink()
           print("Verified and extracted", count, "files (CI workflow to be added separately).")
           PY
       - name: Commit imported source
