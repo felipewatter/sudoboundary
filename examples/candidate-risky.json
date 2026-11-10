@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "defaults": {"authenticate": true, "env_reset": true, "secure_path": "/usr/sbin:/usr/bin:/sbin:/bin", "log_input": true, "log_output": true},
+  "groups": {"ops": ["ana", "bruno"], "auditors": ["carla"]},
+  "rules": [
+    {
+      "id": "ops-view-service", "users": ["%ops"], "hosts": ["web-01"], "runas": ["root"],
+      "commands": [{"path": "/usr/bin/systemctl", "argv": ["status", "nginx.service"]}],
+      "effect": "allow", "tags": {"nopasswd": false, "setenv": false, "log_input": true, "log_output": true, "noexec": true}
+    },
+    {
+      "id": "auditor-logs", "users": ["%auditors"], "hosts": ["web-01"], "runas": ["root"],
+      "commands": [{"path": "/usr/bin/journalctl", "argv": ["-u", "nginx.service", "--no-pager"]}],
+      "effect": "allow", "tags": {"noexec": true}
+    },
+    {
+      "id": "emergency-root-anything", "users": ["%ops"], "hosts": ["ALL"], "runas": ["root"],
+      "commands": [{"path": "ALL", "argv": null}], "effect": "allow",
+      "tags": {"nopasswd": true, "setenv": true, "log_input": false, "log_output": false}
+    }
+  ]
+}

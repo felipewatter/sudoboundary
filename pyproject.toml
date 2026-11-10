@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=69,<90"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sudoboundary"
+version = "1.0.0"
+description = "Offline privileged command policy regression gate for Linux operational security"
+requires-python = ">=3.11"
+readme = "README.md"
+license = "MIT"
+authors = [{name = "Felipe Silva"}]
+keywords = ["linux", "sudo", "policy-as-code", "devsecops", "least-privilege", "security"]
+classifiers = ["Programming Language :: Python :: 3", "Operating System :: OS Independent", "Topic :: Security"]
+dependencies = []
+
+[project.scripts]
+sudoboundary = "sudoboundary.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

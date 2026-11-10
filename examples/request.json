@@ -1,0 +1,1 @@
+{"user": "ana", "host": "web-01", "runas": "root", "path": "/usr/bin/systemctl", "argv": ["status", "nginx.service"]}

@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "queries": [
+    {"user": "ana", "host": "web-01", "runas": "root", "path": "/usr/bin/systemctl", "argv": ["status", "nginx.service"], "expected": true},
+    {"user": "ana", "host": "web-01", "runas": "root", "path": "/usr/bin/systemctl", "argv": ["restart", "nginx.service"], "expected": false},
+    {"user": "carla", "host": "web-01", "runas": "root", "path": "/usr/bin/journalctl", "argv": ["-u", "nginx.service", "--no-pager"], "expected": true},
+    {"user": "outsider", "host": "web-01", "runas": "root", "path": "/bin/sh", "argv": [], "expected": false}
+  ]
+}

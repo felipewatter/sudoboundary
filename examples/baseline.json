@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "defaults": {
+    "authenticate": true,
+    "env_reset": true,
+    "secure_path": "/usr/sbin:/usr/bin:/sbin:/bin",
+    "log_input": true,
+    "log_output": true,
+    "noexec": false,
+    "setenv": false
+  },
+  "groups": {"ops": ["ana", "bruno"], "auditors": ["carla"]},
+  "rules": [
+    {
+      "id": "ops-view-service",
+      "users": ["%ops"],
+      "hosts": ["web-01"],
+      "runas": ["root"],
+      "commands": [{"path": "/usr/bin/systemctl", "argv": ["status", "nginx.service"]}],
+      "effect": "allow",
+      "tags": {"nopasswd": false, "setenv": false, "log_input": true, "log_output": true, "noexec": true},
+      "reason": "Suporte pode consultar o serviço nginx, sem reiniciá-lo"
+    },
+    {
+      "id": "auditor-logs",
+      "users": ["%auditors"],
+      "hosts": ["web-01"],
+      "runas": ["root"],
+      "commands": [{"path": "/usr/bin/journalctl", "argv": ["-u", "nginx.service", "--no-pager"]}],
+      "effect": "allow",
+      "tags": {"noexec": true}
+    }
+  ]
+}
